@@ -227,3 +227,60 @@ La búsqueda devolvió el evento correspondiente a la eliminación automática d
 ![Eliminación automática de Javier Maroto registrada en System Log](screenshots/04-SystemLog.png)
 
 De esta manera, el laboratorio permitió verificar tanto el resultado de las reglas en el directorio como su registro en los eventos de auditoría.
+
+
+## 5. Pruebas y resultados
+
+Una vez configuradas las dos Group Rules, se realizaron varias pruebas para comprobar cómo respondía Okta a los cambios de cargo de los vecinos de Mirador de Montepinar.
+
+### 5.1. Pruebas funcionales
+
+| Prueba | Acción realizada | Resultado observado | Estado |
+|---|---|---|---|
+| 01. Asignación automática del presidente | Activar la regla `Presidencia de Montepinar` con Javi como presidente. | Javi se incorporó automáticamente a `Junta de Gobierno`. | Correcto |
+| 02. Asignación automática del vicepresidente | Activar la regla `Vicepresidencia de Montepinar`. | Leo se incorporó automáticamente al grupo. | Correcto |
+| 03. Ascenso de Amador | Cambiar `cargoVecinal` de `Propietario` a `Presidente`. | Amador se incorporó al grupo sin asignación manual. | Correcto |
+| 04. Presidencia duplicada | Mantener simultáneamente a Javi y Amador con el cargo `Presidente`. | Ambos permanecieron en el grupo porque cumplían la condición de la regla. | Comportamiento verificado |
+| 05. Salida del presidente anterior | Cambiar el atributo de Javi a `ExPresidente`. | Okta retiró automáticamente a Javi del grupo. | Correcto |
+| 06. Auditoría de pertenencias | Consultar los eventos de incorporación y eliminación en System Log. | Se localizaron eventos `SUCCESS` correspondientes a los cambios realizados. | Correcto |
+
+Las pruebas confirmaron que la pertenencia a `Junta de Gobierno` dependía de los valores de `cargoVecinal`, sin necesidad de añadir o retirar manualmente a los personajes.
+
+### 5.2. Limitación detectada: dos presidentes en Montepinar
+
+Durante el ascenso de Amador Rivas se produjo una situación que, tratándose de Mirador de Montepinar, tampoco resulta especialmente sorprendente: **la comunidad terminó temporalmente con dos presidentes**.
+
+Javi conservaba el valor `Presidente` en su perfil cuando Amador recibió el mismo cargo.
+
+La regla incorporó a ambos porque los dos cumplían su condición.
+
+Esto permitió identificar una limitación del diseño:
+
+**Las Group Rules automatizan la pertenencia a grupos, pero no garantizan la exclusividad de los valores utilizados como criterio.**
+
+En este laboratorio, Okta no rechazó la existencia de dos presidentes ni impidió que ambos pertenecieran a `Junta de Gobierno`.
+
+Desde el punto de vista de IAM, esta situación puede convertirse en un problema si la pertenencia al grupo concede acceso a aplicaciones o recursos sensibles.
+
+Para reducir ese riesgo en un entorno empresarial, sería necesario controlar quién puede modificar los atributos utilizados por las reglas y establecer un procedimiento de aprobación y validación de los cambios de responsabilidad.
+
+Estas medidas se identifican como posibles mejoras; no se implementaron en el laboratorio.
+
+### 5.3. Resultado final
+
+Tras completar el relevo de presidencia, la composición del grupo quedó ajustada a los cargos establecidos:
+
+| Usuario | Cargo final | Pertenencia a `Junta de Gobierno` |
+|---|---|---|
+| Amador Rivas | Presidente | Miembro |
+| Leonardo Romaní | Vicepresidente | Miembro |
+| Javier Maroto | ExPresidente | No miembro |
+| Enrique Pastor | Propietario | No miembro |
+
+Las dos reglas permanecieron activas al finalizar las pruebas.
+
+La consulta de System Log permitió confirmar que la retirada de Javier Maroto quedó registrada el 23 de noviembre de 2026 a las 20:52:46, con resultado `SUCCESS` y `Okta System` como actor.
+
+**Resultado del laboratorio:** se verificó la incorporación y retirada automática de usuarios mediante Group Rules basadas en atributos personalizados, así como la trazabilidad de los cambios de pertenencia mediante System Log.
+
+El sistema funcionó conforme a las condiciones configuradas, aunque la prueba de presidencia duplicada evidenció la necesidad de controles adicionales sobre la modificación de atributos.
