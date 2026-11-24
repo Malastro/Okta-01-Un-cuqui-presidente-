@@ -2,7 +2,7 @@
 
 ## 1. Descripción del proyecto
 
-Este laboratorio está inspirado en el primer episodio de la segunda temporada de *La que se avecina*: **«Un soltero, un yogur con fibra y un nuevo presidente»**.
+Este laboratorio está inspirado en el 2x01 de *La que se avecina*: **«Un soltero, un yogur con fibra y un nuevo presidente»**.
 
 Tras la salida de Javi Maroto de la presidencia de Mirador de Montepinar, Amador Rivas decide presentar su candidatura y termina convirtiéndose en el nuevo presidente de la comunidad. Maite Figueroa celebra entusiasmada su ascenso a primera dama, mientras Leo Romaní continúa desempeñando las funciones de vicepresidente.
 
