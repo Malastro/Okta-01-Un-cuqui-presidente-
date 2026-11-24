@@ -14,7 +14,7 @@ El objetivo de este laboratorio es configurar y validar un sistema de gestión d
 
 A través del relevo entre Javi y Amador, se comprobará cómo una modificación en los atributos de un usuario puede provocar una actualización automática de su pertenencia a los grupos correspondientes, sin necesidad de gestionar manualmente cada asignación.
 
-También se analizará el comportamiento de las reglas ante cambios de cargo y excepciones, verificando los resultados mediante la consola de administración de Okta y los eventos registrados en **System Log**.
+También se analizará el comportamiento de las reglas ante cambios de cargo y conflictos derivados de atributos duplicados, verificando los resultados mediante la consola de administración de Okta y los eventos registrados en **System Log**.
 
 El laboratorio permitirá aplicar conceptos fundamentales de *Identity and Access Management (IAM)*, especialmente la administración centralizada de identidades, la gestión de atributos y la automatización de asignaciones basadas en información del perfil.
 
@@ -192,6 +192,8 @@ La captura muestra la composición final de `Junta de Gobierno`, con Amador y Le
 
 El proceso confirmó que las reglas permiten incorporar y retirar usuarios automáticamente cuando cambia la información de sus perfiles.
 
+Durante la prueba, Amador Rivas tenía el estado `Password expired`. Esto no impidió su incorporación automática al grupo mediante la Group Rule. La prueba se centró en la gestión de atributos y pertenencias, por lo que no fue necesario restablecer su contraseña. No se realizaron pruebas de inicio de sesión ni de acceso efectivo a aplicaciones.
+
 ### 4.6. Auditoría mediante System Log
 
 Finalmente, se utilizó **Reports → System Log** para comprobar que los cambios de pertenencia habían quedado registrados.
@@ -289,7 +291,7 @@ El sistema funcionó conforme a las condiciones configuradas, aunque la prueba d
 
 Durante el laboratorio surgieron varias situaciones que obligaron a revisar la configuración inicial y comprobar el comportamiento de Okta antes de continuar.
 
-### 6.1. El grupo Junta tenía una política de autenticación asociada
+### 6.1. El grupo Junta tenía asociada una política de inscripción de autenticadores
 
 Inicialmente se planteó reutilizar el grupo `Junta`, creado en prácticas anteriores.
 
@@ -370,3 +372,10 @@ El laboratorio también puso de manifiesto dos aspectos importantes desde el pun
 **Resultado final:** el laboratorio demuestra el funcionamiento de un modelo básico de gestión de grupos basado en atributos, aplicado a un cambio de responsabilidades y respaldado por pruebas funcionales y registros de auditoría.
 
 En Mirador de Montepinar, Amador Rivas ya ocupa la presidencia y Javi Maroto ha abandonado la Junta de Gobierno. Al menos esta vez, el cambio de presidente no ha requerido una votación interminable ni que Enrique Pastor persiga a los vecinos por el rellano.
+
+## 8. Referencias
+
+- [Okta — Group Rules](https://help.okta.com/okta_help.htm?id=ext_Group_Rules&type=oie)
+- [Okta — Create Group Rules](https://help.okta.com/oie/en-us/Content/Topics/users-groups-profiles/usgp-create-group-rules.htm)
+- [Okta — Authenticator Enrollment Policies](https://help.okta.com/okta_help.htm?id=ext-about-mfa-enrol-policies&type=oie)
+- [La que se avecina — Temporada 2, episodio 1](https://www.formulatv.com/series/la-que-se-avecina/capitulos/5465/)
