@@ -284,3 +284,89 @@ La consulta de System Log permitió confirmar que la retirada de Javier Maroto q
 **Resultado del laboratorio:** se verificó la incorporación y retirada automática de usuarios mediante Group Rules basadas en atributos personalizados, así como la trazabilidad de los cambios de pertenencia mediante System Log.
 
 El sistema funcionó conforme a las condiciones configuradas, aunque la prueba de presidencia duplicada evidenció la necesidad de controles adicionales sobre la modificación de atributos.
+
+## 6. Problemas encontrados y decisiones técnicas
+
+Durante el laboratorio surgieron varias situaciones que obligaron a revisar la configuración inicial y comprobar el comportamiento de Okta antes de continuar.
+
+### 6.1. El grupo Junta tenía una política de autenticación asociada
+
+Inicialmente se planteó reutilizar el grupo `Junta`, creado en prácticas anteriores.
+
+Al revisar su configuración, encontramos que tenía dos usuarios asignados manualmente: Antonio Recio y Enrique Pastor. Aunque no tenía aplicaciones ni roles administrativos asociados, sí estaba incluido en una política activa de inscripción de autenticadores.
+
+La política exigía contraseña y Okta Verify a los usuarios a los que se aplicaba.
+
+**Decisión adoptada:** crear un grupo independiente llamado `Junta de Gobierno`, destinado exclusivamente a las pruebas de automatización.
+
+De este modo, evitamos modificar las pertenencias del grupo original y alterar indirectamente los requisitos de autenticación de sus miembros.
+
+Esta situación demuestra la importancia de revisar las dependencias de un grupo antes de utilizarlo en nuevas automatizaciones.
+
+### 6.2. Las Group Rules no detectaron el conflicto de presidencia
+
+Durante el relevo, Amador Rivas recibió el valor `Presidente` mientras Javier Maroto todavía conservaba ese mismo cargo.
+
+La regla `Presidencia de Montepinar` incorporó a ambos al grupo porque los dos cumplían su condición.
+
+**Decisión adoptada:** completar el relevo modificando el atributo de Javier Maroto a `ExPresidente`.
+
+Okta retiró automáticamente a Javi de `Junta de Gobierno`, sin necesidad de intervenir manualmente sobre su pertenencia.
+
+La prueba evidenció que el funcionamiento de las reglas depende de la calidad y exactitud de los atributos de identidad.
+
+En un entorno empresarial sería conveniente establecer controles para evitar modificaciones incorrectas de los atributos que determinan el acceso a recursos.
+
+### 6.3. La búsqueda inicial en System Log no devolvía resultados
+
+Durante la auditoría se intentó localizar los cambios de pertenencia introduciendo `group.user_membership` directamente en el buscador de System Log.
+
+La búsqueda no devolvió resultados.
+
+Para resolverlo, se utilizaron filtros explícitos sobre el campo `eventType`:
+
+**Incorporaciones:**
+
+```text
+eventType eq "group.user_membership.add"
+```
+
+**Eliminaciones:**
+
+```text
+eventType eq "group.user_membership.remove"
+```
+
+Con estos filtros fue posible identificar los eventos correspondientes a las incorporaciones de Javi, Leo y Amador, así como la retirada de Javi.
+
+**Resultado:** se confirmó que las operaciones estaban registradas correctamente. El problema inicial estaba en la forma de consultar los eventos, no en la ausencia de registros.
+
+Esta comprobación permitió practicar la búsqueda de eventos específicos en System Log, una tarea habitual durante la investigación de incidencias relacionadas con identidades y accesos.
+
+## 7. Conclusiones
+
+El relevo de presidencia de Mirador de Montepinar permitió implementar y comprobar un sistema de gestión automática de pertenencias a grupos mediante **Okta Universal Directory y Group Rules**.
+
+A partir del atributo personalizado `cargoVecinal`, se configuraron dos reglas que determinaron qué usuarios debían pertenecer a `Junta de Gobierno` según sus responsabilidades.
+
+Las pruebas confirmaron que Okta incorporaba y retiraba miembros automáticamente cuando cambiaban los atributos de sus perfiles. El ascenso de Amador Rivas y la salida de Javier Maroto se completaron sin realizar asignaciones manuales al grupo.
+
+Además, mediante **System Log**, se verificó que los cambios de pertenencia quedaban registrados, lo que permitió comprobar las operaciones realizadas y disponer de evidencias para su auditoría.
+
+El laboratorio también puso de manifiesto dos aspectos importantes desde el punto de vista de la seguridad:
+
+- **La automatización depende de la calidad de los atributos.** Las Group Rules no impidieron que dos usuarios tuvieran simultáneamente el cargo de presidente. Para evitar situaciones similares en un entorno empresarial, sería necesario controlar quién puede modificar los atributos que determinan las pertenencias.
+- **Los grupos pueden tener dependencias de seguridad.** Antes de reutilizar `Junta`, se comprobó que tenía asociada una política de inscripción de autenticadores. La creación de un grupo independiente permitió realizar las pruebas sin alterar dicha configuración.
+
+### Competencias IAM trabajadas
+
+- Administración de identidades y atributos personalizados en Universal Directory.
+- Automatización de pertenencias mediante Group Rules.
+- Gestión de cambios de responsabilidad y actualización de grupos.
+- Identificación de limitaciones en las asignaciones basadas en atributos.
+- Revisión de dependencias de seguridad antes de modificar grupos.
+- Investigación y auditoría de eventos mediante System Log.
+
+**Resultado final:** el laboratorio demuestra el funcionamiento de un modelo básico de gestión de grupos basado en atributos, aplicado a un cambio de responsabilidades y respaldado por pruebas funcionales y registros de auditoría.
+
+En Mirador de Montepinar, Amador Rivas ya ocupa la presidencia y Javi Maroto ha abandonado la Junta de Gobierno. Al menos esta vez, el cambio de presidente no ha requerido una votación interminable ni que Enrique Pastor persiga a los vecinos por el rellano.
